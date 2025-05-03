@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+h1, h2 {
+  font-family: 'Playfair Display', serif;
+}
