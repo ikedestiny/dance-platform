@@ -1,27 +1,34 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const authRoutes = require('./routes/auth');
-const boardRoutes = require('./routes/boards');
-const pinRoutes = require('./routes/pins');
+const { Pool } = require('pg');
+require('dotenv').config();
 
-dotenv.config();
 const app = express();
+const port = 3000;
 
-// Middleware
+const pool = new Pool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+});
+
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+const mongoURI = process.env.MONGO_URI;
+
+mongoose.connect(mongoURI)
+    .then(() => console.log('✅ Connected to MongoDB'))
+    .catch(err => console.error('❌ MongoDB connection error:', err));
+
+
 app.use(express.json());
 
-// Connect to MongoDB (free tier)
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log('MongoDB connected'));
+app.get('/', async (req, res) => {
+    const result = await pool.query('SELECT NOW()');
+    res.send(`Database time: ${result.rows[0].now}`);
+});
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/boards', boardRoutes);
-app.use('/api/pins', pinRoutes);
-
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
